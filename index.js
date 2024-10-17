@@ -20,13 +20,6 @@ app.use((req,res,next)=>{
 });
 app.use(express.json());
 
-const products=[
-  {id:0,name:"Notebook AcerSwift",price:45900,img:"https://img.advice.co.th/images_nas/pic_product4/A0147295/A0147295_s.jpg"},
-  {id:1,name:"Notebook AsusVivo",price:19900,img:"https://img.advice.co.th/images_nas/pic_product4/A0146010/A0146010_s.jpg"},
-  {id:2,name:"Notebook LenovoIdeapad",price:32900,img:"https://img.advice.co.th/images_nas/pic_product4/A0149009/A0149009_s.jpg"},
-  {id:3,name:"Notebook MSIPrestige",price:54900,img:"https://img.advice.co.th/images_nas/pic_product4/A0149954/A0149954_s.jpg"},
-  {id:4,name:"Notebook DELLXPS",price:99900,img:"https://img.advice.co.th/images_nas/pic_product4/A0146335/A0146335_s.jpg"},
-  {id:5,name:"Notebook HPEnvy",price:46900,img:"https://img.advice.co.th/images_nas/pic_product4/A0145712/A0145712_s.jpg"}];
 
 var con = mysql.createConnection({
   host: "korawit.ddns.net",
@@ -65,6 +58,52 @@ app.get('/api/products/:id',(req,res)=>{
     console.log(result);
   })
 })
+
+app.post('/api/addproduct',function(req,res){
+  const name=req.body.name;
+  const price=req.body.price;
+  const img=req.body.img;
+  console.log(name,price,img);
+  var sql = "INSERT INTO products (name,price,img) VALUES('${name}','${price}','${img})";
+  con.query(sql,function(err,result,fields){
+    if(err) throw err;
+    let product=result;
+    if(product.length>0){
+      res.send(product);
+    }
+    else{
+      res.status(400).send('Not found product for'+id);
+    }
+    console.log(result);
+  })
+})
+
+app.delete('/api/delproduct/:id',function(req,res){
+  const id =req.params.id;
+  con.query("DELETE FROM products where id="+id,function(err,result,fields){
+    if(err) throw err;
+    con.query("SELECT * FROM products",function (err,result,fields){
+      if(err) throw err;
+      res.send(result);
+      console.log(result);
+    });
+  });
+});
+
+app.put('/api/delproduct/:id',function(req,res){
+  const id =req.params.id;
+  const name=req.body.name;
+  const price=req.body.price;
+  const img=req.body.img;
+  con.query("UPDATE FROM products SET name='${name}',price='${price}',img='${img}' WHERE id =${id}",function(err,result,fields){
+    if(err) throw err;
+    con.query("SELECT * FROM products",function (err,result,fields){
+      if(err) throw err;
+      res.send(result);
+      console.log(result);
+    });
+  });
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
